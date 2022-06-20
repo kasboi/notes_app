@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme) => {
     },
     page: {
       background: '#F9F9D5',
+      minHeight: '100vh',
       width: '100%',
       padding: theme.spacing(3)
     },
@@ -195,7 +196,7 @@ const Layout = ({ children, token, setToken }) => {
       </Drawer>
 
       <div className={classes.page}>
-      <div className={ classes.toolbar }></div>
+      <div className={ classes.toolbar } onClick={()=> setAppOpen(false)} sx={{height: '100%'}}></div>
         { children }
       </div>
     </div>
