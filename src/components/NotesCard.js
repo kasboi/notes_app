@@ -1,8 +1,9 @@
 import { DeleteOutlined } from '@mui/icons-material';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { Avatar, Card, CardContent, CardHeader, Container, IconButton, Typography } from '@mui/material'
 import { blue, green, pink, yellow } from '@mui/material/colors';
 
-const NotesCard = ( {notes, handleDelete} ) => {
+const NotesCard = ( {notes, handleDelete, handleEdit} ) => {
   const bgColor = {
     backgroundColor: () => {
       if (notes.category == 'Work') {
@@ -29,9 +30,14 @@ const NotesCard = ( {notes, handleDelete} ) => {
             </Avatar>
           }
           action={
-            <IconButton onClick={() => handleDelete(notes.id)}>
-              <DeleteOutlined/>
-            </IconButton>
+            <>
+              <IconButton onClick={() => handleEdit(notes.id, notes.title, notes.details, notes.category)}>
+                <EditOutlinedIcon/>
+              </IconButton>
+              <IconButton onClick={() => handleDelete(notes.id)}>
+                <DeleteOutlined/>
+              </IconButton>
+            </>
           }
           title={notes.title}
           subheader={notes.category}

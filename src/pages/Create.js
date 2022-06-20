@@ -3,6 +3,8 @@ import Button from "@mui/material/Button";
 import { Typography, Container, TextField, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio} from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import { useHistory } from "react-router";
+import app from "../Firebase/auth";
+import { getFirestore, collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 const style = {
   marginTop: 2,
@@ -10,16 +12,22 @@ const style = {
   display: 'block'
 }
 
-export default function Create() {
+export default function Create({ title, setTitle, category, setCategory, details, setDetails, token }) {
 
-const [title, setTitle] = useState('')
-const [details, setDetails] = useState('')
 const [titleError, setTitleError] = useState(false)
 const [detailsError, setDetailsError] = useState(false)
-const [category, setCategory] = useState("Todos")
 
 const history = useHistory()
 
+const db = getFirestore()
+const doSomething = async (title, details, category) => {
+  const docRef = await addDoc(collection(db, `users/${token}/someNotes`), {
+    title: title,
+    details: details,
+    category: category,
+    timestamp: serverTimestamp()
+  })
+}
 
 const handleClick = (e) => {
   e.preventDefault()
@@ -36,11 +44,12 @@ const handleClick = (e) => {
   }
 
   if (title && details) {
-    fetch('http://localhost:8000/notes', {
-      method: 'POST',
-      headers: {"Content-type": "application/json"},
-      body: JSON.stringify({ title, details, category})
-    }).then(() => history.push('/'))
+    doSomething(title, details, category)
+    history.push('/')
+
+    setTitle('')
+    setDetails('')
+    setCategory('')
   }
   
 }
@@ -52,7 +61,7 @@ const handleClick = (e) => {
         variant="h6" 
         gutterBottom
       >
-        create a New Note
+        create a new note
       </Typography>
       <form 
         noValidate 
@@ -67,6 +76,7 @@ const handleClick = (e) => {
         autoComplete="off"
         variant="outlined"
         label="Name"
+        value={ title ? title : ''}
         fullWidth
         required
         error={titleError}
@@ -77,7 +87,8 @@ const handleClick = (e) => {
           ...style
           }}
         variant="outlined"
-        label="Details" 
+        label="Details"
+        value={ details ? details : ''} 
         fullWidth
         multiline
         rows="4"

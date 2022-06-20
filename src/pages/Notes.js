@@ -2,34 +2,46 @@ import { Card, CardContent, CardHeader, Container, Grid } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import NotesCard from '../components/NotesCard'
 import Masonry from '@mui/lab/Masonry'
+import { useHistory } from 'react-router-dom'
+import useFetch from '../customHooks/useFetch'
+import { deleteDoc, doc, getFirestore } from 'firebase/firestore'
 
-export default function Notes() {
 
-  const [notes, setNotes] = useState([])
+export default function Notes({ setTitle, setDetails, setCategory, token }) {
 
-  useEffect(() => {
-    fetch('http://localhost:8000/notes')
-    .then(res => res.json())
-    .then(data => setNotes(data))
-  }, [])
+  const db = getFirestore()
+  
+  const {data: notes, isPending, error, setData: setNotes} = useFetch(token)
+  const history = useHistory()
 
   const handleDelete = async (id) => {
-    await fetch('http://localhost:8000/notes/'+id, {
-      method: 'DELETE'
-    })
+    await deleteDoc(doc(db, `users/${token}/someNotes`, id))
+
     const newNotes = notes.filter(note => note.id !== id)
     setNotes(newNotes)
   }
 
+  const handleEdit = async (id, title, details, category) => {
+    setTitle(title)
+    setDetails(details)
+    setCategory(category)
+    history.push('/create')
+
+    await deleteDoc(doc(db, `users/${token}/someNotes`, id))
+  }
+
+
   return (
     <Container>
-    <Masonry columns={{ xs: 1, md: 3 }} spacing={1}>
-      {notes.map(notes => (
-        <div key={notes.id}>
-          <NotesCard notes={notes} handleDelete={handleDelete} />
-        </div>
-      ))}
-    </Masonry>
+      { error && <div>{ error }</div> }
+      { isPending && <div>Loading...</div> }
+      {notes && <Masonry columns={{ xs: 1, md: 3 }} spacing={1}>
+        {notes.map(notes => (
+          <div key={notes.id}>
+            <NotesCard notes={notes} handleDelete={handleDelete} handleEdit={handleEdit} />
+          </div>
+        ))}
+      </Masonry>}
     </Container>
   )
 }
